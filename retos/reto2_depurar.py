@@ -16,17 +16,28 @@ from utiles import escribir_csv, guardar_texto, tabla_texto
 
 def agrupar_variantes(valores, normalizar):
     """Diccionario forma_normalizada -> conjunto de formas originales distintas."""
-    # TODO: Para cada v: clave = normalizar(v). Si la clave no está en grupos, cread un set() vacío;
-    # después añadid v al conjunto de esa clave.
-    return {}
+    grupos = {}
+    for v in valores:
+        clave = normalizar(v)               # la etiqueta de la "caja": el texto limpio
+        if clave not in grupos:
+            grupos[clave] = set()           # caja nueva y vacía
+        grupos[clave].add(v)                # metemos la forma original (el set no guarda repetidos)
+    return grupos
 
 
 def parecidas(textos, umbral=0.85):
     """Parejas de textos distintos que se parecen mucho (posibles erratas).
     Compara todas las parejas: k(k-1)/2 comparaciones. Devuelve (parejas, comparaciones)."""
-    # TODO: Ordenad los textos distintos (sorted(set(textos))) y comparad cada pareja i < j con
-    # SequenceMatcher(None, a, b).ratio(). Contad las comparaciones.
-    return [], 0
+    distintos = sorted(set(textos))         # sin repetidos y en orden
+    parejas = []
+    comparaciones = 0
+    for i in range(len(distintos)):
+        for j in range(i + 1, len(distintos)):   # j empieza en i+1: cada pareja se compara una sola vez
+            comparaciones += 1
+            parecido = SequenceMatcher(None, distintos[i], distintos[j]).ratio()   # 0 = nada, 1 = iguales
+            if parecido >= umbral:
+                parejas.append((distintos[i], distintos[j], round(parecido, 2)))
+    return parejas, comparaciones
 
 
 def pruebas():
